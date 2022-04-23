@@ -6,13 +6,13 @@ import {
 	StatusBar,
 	Dimensions,
 	Animated,
-	Text
+	Text,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { keyframes, stagger } from "popmotion";
 
-const COUNT = 3;
-const DURATION = 4000;
+const COUNT = 4;
+const DURATION = 5000;
 const INITIAL_PHASE = { scale: 0, opacity: 1 };
 
 export default function App() {
@@ -86,13 +86,9 @@ export default function App() {
 					</View>
 				</Marker>
 			</MapView>
-			{
-				data.chargers.map((info) =>
-					<Card 
-					info = {info}
-					/>
-					)
-			}
+			{data.chargers.map((info, idx) => (
+				<Card info={info} key={idx} />
+			))}
 		</View>
 	);
 }
@@ -136,27 +132,40 @@ const styles = StyleSheet.create({
 	},
 });
 
-function Card({info}) {
+function Card({ info }) {
 	return (
 		<View style={cardStyles.container}>
-			<Text style={cardStyles.header}>{info.name.toUpperCase().split("-")[0]}...</Text>
-			<Text style={cardStyles.subHeader} >{info.address}</Text>
+			<Text style={cardStyles.header}>
+				{info.name.toUpperCase().split("-")[0]}...
+			</Text>
+			<Text style={cardStyles.subHeader}>{info.address}</Text>
 			<Text style={cardStyles.title}>SUPPORTED CONNECTORS</Text>
 			<View>
-			{info.connector_types.map((connector, idx) => 
-				<View key={idx}>
-					<Text style={cardStyles.connector} >
-						{connector[0] === "l"
-							? 
-							"Level " + connector.split("-")[0][3] + (" ") + connector.split("-")[0].substring(connector.split("-")[0].length - 2).toUpperCase()  
-							: 
-							"Normal " + connector.split("-")[0].substring(connector.split("-")[0].length - 2).toUpperCase()
-						}
-					</Text>
-					<Text style={cardStyles.connectorCnt}> X{ connector.split("-")[1]}</Text>
-				</View>
-			)}
-			</View>			
+				{info.connector_types.map((connector, idx) => (
+					<View style={cardStyles.slots} key={idx}>
+						<View>
+							<Text style={cardStyles.connector}>
+								{connector[0] === "l"
+									? `Level ${connector.split("-")[0][3]} ${connector
+											.split("-")[0]
+											.substring(connector.split("-")[0].length - 2)
+											.toUpperCase()}`
+									: `Normal ${connector
+											.split("-")[0]
+											.substring(connector.split("-")[0].length - 2)
+											.toUpperCase()}`}
+							</Text>
+							<Text style={cardStyles.watt}>
+								{connector[0] === "l" ? "15kW Fast Charging" : "3kW Charging"}
+							</Text>
+						</View>
+						<Text style={cardStyles.connectorCnt}>
+							{" "}
+							X{connector.split("-")[1]}
+						</Text>
+					</View>
+				))}
+			</View>
 		</View>
 	);
 }
@@ -165,29 +174,44 @@ const cardStyles = StyleSheet.create({
 	container: {
 		position: "absolute",
 		height: 280,
-		width: 240,
+		width: 256,
 		backgroundColor: "#000",
 		borderRadius: 16,
 		bottom: 16,
 		left: 16,
+		padding: 16,
 	},
 	header: {
-		fontSize: 15,
+		fontSize: 14,
 		color: "#fff",
+		marginBottom: 8,
 	},
 	subHeader: {
 		textTransform: "capitalize",
-		color: "#454545"
+		color: "#bababa",
+		fontSize: 12,
+		marginBottom: 16,
 	},
 	title: {
 		textTransform: "uppercase",
-		color: "#68BFA1"
+		color: "#68BFA1",
 	},
 	connector: {
+		fontSize: 16,
 		color: "#fff",
-
 	},
 	connectorCnt: {
-		color: "#fff"
+		color: "#fff",
+		fontSize: 18,
+	},
+	slots: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		padding: 16,
+		paddingVertical: 4,
+	},
+	watt: {
+		color: "#68bfa1",
+		fontSize: 10,
 	}
 });
