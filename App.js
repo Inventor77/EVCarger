@@ -12,7 +12,7 @@ import Svg, { Path } from "react-native-svg";
 import { keyframes, stagger } from "popmotion";
 
 const COUNT = 4;
-const DURATION = 5000;
+const DURATION = 4000;
 const INITIAL_PHASE = { scale: 0, opacity: 1 };
 
 export default function App() {
@@ -86,9 +86,11 @@ export default function App() {
 					</View>
 				</Marker>
 			</MapView>
-			{data.chargers.map((info, idx) => (
-				<Card info={info} key={idx} />
-			))}
+			<View style={styles.cardContainer}>
+				{data.chargers.map((info, idx) => (
+					<Card info={info} key={idx} />
+				))}
+			</View>
 		</View>
 	);
 }
@@ -129,6 +131,15 @@ const styles = StyleSheet.create({
 		borderRadius: 100,
 		alignSelf: "center",
 		position: "absolute",
+	},
+	cardContainer: {
+		position: "absolute",
+		bottom: 16,
+		left: 16,
+		width: "100%",
+		overflow: "hidden",
+		flexDirection: "row",
+		justifyContent: "flex-start",
 	},
 });
 
@@ -172,14 +183,12 @@ function Card({ info }) {
 
 const cardStyles = StyleSheet.create({
 	container: {
-		position: "absolute",
 		height: 280,
 		width: 256,
 		backgroundColor: "#000",
 		borderRadius: 16,
-		bottom: 16,
-		left: 16,
 		padding: 16,
+		marginRight: 16,
 	},
 	header: {
 		fontSize: 14,
@@ -213,5 +222,5 @@ const cardStyles = StyleSheet.create({
 	watt: {
 		color: "#68bfa1",
 		fontSize: 10,
-	}
+	},
 });
