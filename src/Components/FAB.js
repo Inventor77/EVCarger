@@ -1,9 +1,9 @@
 import { StyleSheet, Pressable } from "react-native";
 import UploadIcon from "../Icons/UploadIcon";
 
-const FAB = (props) => {
+const FAB = ({onPress}) => {
 	return (
-		<Pressable style={FABStyles.container} onPress={props.onPress}>
+		<Pressable style={FABStyles.container} onPress={() => onPress()}>
 			<UploadIcon />
 		</Pressable>
 	);
@@ -17,7 +17,7 @@ const FABStyles = StyleSheet.create({
 		position: "absolute",
 		top: 50,
 		right: 30,
-		backgroundColor: "#F00",
+		backgroundColor: "#E15468",
 		paddingHorizontal: 20,
 		paddingVertical: 20,
 		elevation: 10,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import MapView, { Marker } from "react-native-maps";
 import {
 	StyleSheet,
@@ -8,15 +8,15 @@ import {
 	Animated,
 	ScrollView,
 } from "react-native";
-import Svg, { Path } from "react-native-svg";
 import { keyframes, stagger } from "popmotion";
 import * as Location from "expo-location";
-import FAB from "./src/Components/FAB"
-import Card from "./src/Components/Card"
-import NavIcon from "./src/Icons/NavIcon"
+import ViewShot from "react-native-view-shot";
+import FAB from "./src/Components/FAB";
+import Card from "./src/Components/Card";
+import NavIcon from "./src/Icons/NavIcon";
 
-const COUNT = 3;
-const DURATION = 3000;
+const COUNT = 6;
+const DURATION = 500;
 const INITIAL_PHASE = { scale: 0, opacity: 1 };
 
 export default function App() {
@@ -25,8 +25,39 @@ export default function App() {
 	);
 	const [location, setLocation] = useState(null);
 	const [errorMsg, setErrorMsg] = useState(null);
+	const viewShotRef = useRef();
 
 	const data = require("./data.json");
+
+	async function captureViewShot() {
+		const imageURI = await viewShotRef.current.capture();
+		try {
+			const image = {
+				uri: imageURI,
+				type: "image/jpeg",
+				name: "photo.jpg",
+			};
+			form = new FormData();
+			form.append("Screenshot", image);
+			fetch("HTTP://3.7.20.173:8503/api/upload/", {
+				body: form,
+				method: "PUT",
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			})
+				.then((response) => response.json())
+				.catch((error) => {
+					alert("ERROR " + error);
+				})
+				.then((responseData) => {
+					alert("Image is Successfully uploaded" );
+				})
+				.done();
+		} catch (error) {}
+
+		console.log(imageURI);
+	}
 
 	const _getLocation = async () => {
 		let { status } = await Location.requestForegroundPermissionsAsync();
@@ -57,63 +88,70 @@ export default function App() {
 		animate();
 	}, []);
 
+	useEffect(() => {
+		console.log(location);
+	}, [location]);
+
 	return (
 		<View style={styles.container}>
-			{location && (
-				<MapView
-					style={styles.map}
-					region={{
-						latitude: location.coords.latitude,
-						longitude: location.coords.longitude,
-						latitudeDelta: 0.04,
-						longitudeDelta: 0.04,
-					}}
-				>
-					<Marker
-						coordinate={{
+			<ViewShot
+				ref={viewShotRef}
+				style={styles.container}
+				options={{ format: "jpg", quality: 0.5, result: "base64" }}
+			>
+				{location && (
+					<MapView
+						style={styles.map}
+						region={{
 							latitude: location.coords.latitude,
 							longitude: location.coords.longitude,
+							latitudeDelta: 0.04,
+							longitudeDelta: 0.04,
 						}}
-						title={"You are here"}
-						style={styles.mark}
 					>
-						<View style={styles.markerContainer}>
-							{animations.map(({ opacity, scale }, index) => {
-								return (
-									<Animated.View
-										key={index}
-										style={[
-											styles.circle,
-											{
-												transform: [{ scale }],
-												opacity,
-											},
-										]}
-									/>
-								);
-							})}
-							<View style={styles.marker}>
-								<NavIcon />
+						<Marker
+							coordinate={{
+								latitude: location.coords.latitude,
+								longitude: location.coords.longitude,
+							}}
+							title={"You are here"}
+							style={styles.mark}
+						>
+							<View style={styles.markerContainer}>
+								{animations.map(({ opacity, scale }, index) => {
+									return (
+										<Animated.View
+											key={index}
+											style={[
+												styles.circle,
+												{
+													transform: [{ scale }],
+													opacity,
+												},
+											]}
+										/>
+									);
+								})}
+								<View style={styles.marker}>
+									<NavIcon />
+								</View>
 							</View>
-						</View>
-					</Marker>
-				</MapView>
-			)}
-			<ScrollView
-				horizontal
-				scrollEventThrottle={1}
-				showsHorizontalScrollIndicator={false}
-				height={300}
-				style={styles.cardContainer}
-			>
-				{data.chargers.map((info, idx) => (
-					<Card
-						info={info}
-						key={idx}
-					/>
-				))}
-			</ScrollView>
-			<FAB />
+						</Marker>
+					</MapView>
+				)}
+				<ScrollView
+					horizontal
+					scrollEventThrottle={1}
+					showsHorizontalScrollIndicator={false}
+					height={300}
+					style={styles.cardContainer}
+				>
+					{data.chargers.map((info, idx) => (
+						<Card info={info} key={idx} />
+					))}
+				</ScrollView>
+			</ViewShot>
+			<FAB onPress={captureViewShot} />
 		</View>
 	);
 }
@@ -149,8 +187,8 @@ const styles = StyleSheet.create({
 	markerImage: {},
 	circle: {
 		backgroundColor: "#E15468",
-		height: 52,
-		width: 52,
+		height: 48,
+		width: 48,
 		borderRadius: 100,
 		alignSelf: "center",
 		position: "absolute",
