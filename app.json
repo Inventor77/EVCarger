@@ -20,6 +20,11 @@
       "supportsTablet": true
     },
     "android": {
+      "package":"ev.charger",
+      "config": {
+      "googleMaps": {
+        "apiKey": "AIzaSyClh-M5WhEeTgE2gg0xrTg_5Wp28x-YEaQ"
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

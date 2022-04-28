@@ -1,11 +1,11 @@
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import UploadIcon from "../Icons/UploadIcon";
 
 const FAB = ({onPress}) => {
 	return (
-		<Pressable style={FABStyles.container} onPress={() => onPress()}>
+		<TouchableOpacity style={FABStyles.container} onPress={() => onPress()}>
 			<UploadIcon />
-		</Pressable>
+		</TouchableOpacity>
 	);
 };
 
