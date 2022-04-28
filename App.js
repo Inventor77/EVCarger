@@ -32,19 +32,20 @@ export default function App() {
 	async function captureViewShot() {
 		try {
 			const imageURI = await viewShotRef.current.capture();
-			const image = await {
+			console.log(imageURI);
+			const image = {
 				uri: imageURI,
 				type: "image/jpeg",
 				name: "photo.jpg",
 			};
 			formData = new FormData();
-			formData.append("Screenshot", image);
+			formData.append("file", image);
 			const response = await fetch("http://3.7.20.173:8503/api/upload/", {
-				body: formData,
-				method: "PUT",
 				headers: {
 					"Content-Type": "multipart/form-data",
 				},
+				method: "POST",
+				body: formData,
 			});
 			const data = await response.json();
 			alert("Image is Successfully uploaded: ", data);
@@ -53,7 +54,7 @@ export default function App() {
 		}
 	}
 
-	const _getLocation = async () => {
+	const getLocation = async () => {
 		let { status } = await Location.requestForegroundPermissionsAsync();
 		if (status !== "granted") {
 			setErrorMsg("Permission to access location was denied");
@@ -78,7 +79,7 @@ export default function App() {
 	};
 
 	useEffect(() => {
-		_getLocation();
+		getLocation();
 		animate();
 	}, []);
 
@@ -87,7 +88,7 @@ export default function App() {
 			<ViewShot
 				ref={viewShotRef}
 				style={styles.container}
-				options={{ format: "jpg", quality: 0.5, result: "base64" }}
+				options={{ format: "jpg", quality: 0.1 }}
 			>
 				{errorMsg && alert("Restart the app and give location permission")}
 				{location && (
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
 		position: "absolute",
 	},
 	cardContainer: {
-		flex : 1,
+		flex: 1,
 		position: "absolute",
 		bottom: 8,
 		left: 8,
