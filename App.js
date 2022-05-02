@@ -5,24 +5,56 @@ import {
 	View,
 	StatusBar,
 	Dimensions,
-	Animated,
 	ScrollView,
 } from "react-native";
-import { keyframes, stagger } from "popmotion";
 import * as Location from "expo-location";
 import ViewShot from "react-native-view-shot";
 import FAB from "./src/Components/FAB";
 import Card from "./src/Components/Card";
 import NavIcon from "./src/Icons/NavIcon";
+import Animated, {
+	useSharedValue,
+	useAnimatedStyle,
+	withTiming,
+	withDelay,
+	withRepeat,
+	Easing,
+	Extrapolate,
+	interpolate,
+} from "react-native-reanimated";
 
-const COUNT = 5;
-const DURATION = 500;
-const INITIAL_PHASE = { scale: 0, opacity: 1 };
+const Pulse = ({ repeat, delay }) => {
+	const animation = useSharedValue(0);
+	useEffect(() => {
+		animation.value = withDelay(
+			delay,
+			withRepeat(
+				withTiming(1, {
+					duration: 1500,
+					easing: Easing.linear,
+				}),
+				repeat ? -1 : 1,
+				false
+			)
+		);
+	}, []);
+	const animatedStyles = useAnimatedStyle(() => {
+		const opacity = interpolate(
+			animation.value,
+			[0, 1],
+			[0.6, 0],
+			Extrapolate.CLAMP
+		);
+		return {
+			opacity: opacity,
+			transform: [{ scale: animation.value }],
+		};
+	});
+	return <Animated.View style={[styles.circle, animatedStyles]} />;
+};
 
 export default function App() {
-	const [animations, setAnimations] = useState(
-		Array(COUNT).map(() => INITIAL_PHASE)
-	);
+	const [pulse, setPulse] = useState(Array(3).fill(0));
 	const [location, setLocation] = useState(null);
 	const [errorMsg, setErrorMsg] = useState(null);
 	const viewShotRef = useRef();
@@ -64,23 +96,8 @@ export default function App() {
 		setLocation(location);
 	};
 
-	const animate = () => {
-		const actions = Array(COUNT).fill(
-			keyframes({
-				values: [INITIAL_PHASE, { scale: 2, opacity: 0 }],
-				duration: DURATION,
-				loop: Infinity,
-				yoyo: Infinity,
-			})
-		);
-		stagger(actions, DURATION / COUNT).start((animations) => {
-			setAnimations(animations);
-		});
-	};
-
 	useEffect(() => {
 		getLocation();
-		animate();
 	}, []);
 
 	return (
@@ -110,23 +127,12 @@ export default function App() {
 							style={styles.mark}
 						>
 							<View style={styles.markerContainer}>
-								{animations.map(({ opacity, scale }, index) => {
-									return (
-										<Animated.View
-											key={index}
-											style={[
-												styles.circle,
-												{
-													transform: [{ scale }],
-													opacity,
-												},
-											]}
-										/>
-									);
-								})}
 								<View style={styles.marker}>
 									<NavIcon />
 								</View>
+								{pulse.map((item, index) => (
+									<Pulse repeat={index === 0} delay={index * 100} key={index} />
+								))}
 							</View>
 						</Marker>
 					</MapView>
@@ -167,23 +173,24 @@ const styles = StyleSheet.create({
 	},
 	marker: {
 		backgroundColor: "#E15468",
-		height: 32,
-		width: 32,
+		height: 36,
+		width: 36,
 		borderRadius: 32,
 		justifyContent: "center",
 		alignItems: "center",
 		position: "absolute",
-		zIndex: 1,
+		zIndex: 2,
 		transform: [{ scaleX: -1 }],
 	},
 	markerImage: {},
 	circle: {
 		backgroundColor: "#E15468",
-		height: 48,
-		width: 48,
+		height: 96,
+		width: 96,
 		borderRadius: 100,
 		alignSelf: "center",
 		position: "absolute",
+		zIndex: 1,
 	},
 	cardContainer: {
 		flex: 1,
